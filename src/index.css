@@ -1,0 +1,83 @@
+body {
+    font: 14px "Century Gothic", Futura, sans-serif;
+    margin: 20px 50% 20px 20px;
+    color: #2c2b2b;
+}
+
+ol, ul {
+    padding-left: 30px;
+}
+
+.board-row:after {
+    clear: both;
+    content: "";
+    display: table;
+}
+
+.status {
+    margin-bottom: 10px;
+}
+
+.square {
+    background: #fff;
+    border: 1px solid #999;
+    float: left;
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 34px;
+    height: 34px;
+    margin-right: -1px;
+    margin-top: -1px;
+    padding: 0;
+    text-align: center;
+    width: 34px;
+}
+
+.square:focus {
+    outline: none;
+}
+
+.kbd-navigation .square:focus {
+    background: #ddd;
+}
+
+.game {
+    display: flex;
+    flex-direction: row;
+}
+
+.game-info {
+    margin-left: 20px;
+}
+
+.postTitle{
+    font-size: 90%;
+    margin: 0.3em 0;
+}
+
+.postBody{
+    font-size: 90%;
+    margin: 0.3em 0;
+}
+
+.pagination li{
+    display: inline;
+    padding: 8px;
+}
+
+li.active{
+    font-weight: bold;
+}
+
+li.grey{
+    color: #d0d0d0;
+    font-style: italic;
+}
+
+.multiline, li > div {
+    /*background: url(images/benice.png) center center no-repeat; !* This ruins default border *!*/
+    border: 1px solid #888;
+    background-color: #e8e8e8;
+    width: 100%;
+    height: 75px;
+}
