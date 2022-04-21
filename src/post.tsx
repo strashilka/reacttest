@@ -1,99 +1,86 @@
 import * as React from 'react';
-import {useParams} from "react-router-dom";
-import {Comments} from "./comments";
-import PostInterface from "./PostInterface";
+import { useParams } from 'react-router-dom';
+import Comments from './comments';
+import PostInterface from './PostInterface';
 
-interface PostInnerPropsI{
+interface PostInnerPropsI {
     postId: string;
 }
 
-interface PostInnerStateI{
+interface PostInnerStateI {
     postId: string;
     currentPost: PostInterface;
     posts: Array<PostInterface>
 }
 
-export function Post(){
-    let params = useParams();
-    let post_id  = params.postId;
+class PostInner extends React.Component<PostInnerPropsI, PostInnerStateI> {
+  constructor(props: PostInnerPropsI) {
+    super(props);
+    this.state = {
+      postId: props.postId,
+      currentPost: null,
+      posts: [],
+    };
+  }
 
-    return <PostInner postId={post_id}/>;
+  componentDidMount() {
+    const { postId } = this.state;
+    this.getPostById(postId);
+  }
+
+  getPostById(postId: string) {
+    // console.log("getPostById");
+    // fetching post
+    const { state } = this;
+    const post = state.posts.find((searchedPost) => searchedPost.id === postId);
+    if (post) {
+      this.setState({
+        currentPost: post,
+      });
+    } else {
+      // console.log("getPostById 2");
+      this.fetchPost(postId);
+      // requesst and save
+    }
+
+    this.setState({
+      currentPost: null,
+    });
+  }
+
+  fetchPost(postId: string) {
+    fetch(`https://jsonplaceholder.typicode.com/posts/${postId}`)
+      .then((response) => response.json())
+      .then((json) => {
+        if (json !== undefined) {
+          this.setState({
+            currentPost: json,
+          });
+        }
+      });
+  }
+
+  render() {
+    let outlet: any;// JSX.Element;
+    const { state } = this;
+    if (state.currentPost) {
+      outlet = (
+        <div key={state.currentPost.id}>
+          <h3 className="postTitle">{state.currentPost.title}</h3>
+          <p className="postBody">{state.currentPost.body}</p>
+          <Comments postId={state.currentPost.id} />
+        </div>
+      );
+    } else {
+      outlet = <h3>Fetching</h3>;
+    }
+    return (outlet);
+  }
 }
 
-class PostInner extends React.Component<PostInnerPropsI, PostInnerStateI>{
-    constructor(props:PostInnerPropsI) {
-        super(props);
-        this.state = {
-            postId: props.postId,
-            currentPost:null,
-            posts: []
-        }
-    }
+export default function Post() {
+  const params = useParams();
+  const { postId } = params;
 
-    componentDidMount() {
-        let post_id  = this.state.postId;
-        this.getPostById(post_id);
-    }
-
-    getPostById(post_id: string) {
-        // console.log("getPostById");
-        //fetching post
-        let post = this.state.posts.find((post) => post.id === post_id);
-        if (post)
-        {
-            console.log("getPostById 1");
-            this.setState({
-                currentPost: post
-            })
-        }
-        else
-        {
-            // console.log("getPostById 2");
-            this.fetchPost(post_id);
-            // requesst and save
-        }
-
-        this.setState({
-            currentPost: null
-        })
-
-    }
-
-    fetchPost(post_id: string){
-        fetch("https://jsonplaceholder.typicode.com/posts/" + post_id)
-            .then((response) => response.json())
-            .then((json) => {
-                if (json !== undefined) {
-                    this.setState({
-                        currentPost: json
-                    });
-                }
-            });
-    }
-
-    render() {
-        let outlet : any;//JSX.Element;
-        if (this.state.currentPost){
-            outlet = <div key={this.state.currentPost.id}>
-                <h3 className="postTitle">{this.state.currentPost.title}</h3>
-                <p className="postBody">{this.state.currentPost.body}</p>
-                <Comments postId={this.state.currentPost.id}/>
-            </div>;
-        }
-        else
-        {
-            outlet = <h3>Fetching</h3>;
-        }
-        return (outlet);
-    }
-
-    // let params = useParams();
-    // let post_id = params.postId;
-    // let post = getPost(post_id);
-    // console.log(params);
-    // return <div>
-    //     <h2>{post.title}</h2>
-    //     <p>{post.body}</p>
-    //     <Comments/>
-    // </div>;
+  return <PostInner postId={postId} />;
 }

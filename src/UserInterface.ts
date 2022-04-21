@@ -1,4 +1,4 @@
-export default interface UserInterface{
+interface UserInterface {
     id: number;
     name: string;
     username: string;
@@ -21,3 +21,5 @@ export default interface UserInterface{
         bs: string;
     }
 }
+
+export default UserInterface;

@@ -1,9 +1,5 @@
 import * as React from 'react';
-import UserInterface from "./UserInterface";
-
-// interface GetUsersListPropsInterface{
-//     url: string;
-// }
+import UserInterface from './UserInterface';
 
 interface GetUserListStateInterface {
     users: Array<UserInterface>;
@@ -12,68 +8,77 @@ interface GetUserListStateInterface {
     URL: string;
 }
 
-export function Users() {
-    return (<div>
-        <h2>Users list</h2>
-        <GetUsersList/>
-    </div>);
-}
-
 interface GetUsersListPropsI {
     // url: string;
     // onFilterByUser: any;//5555
 }
 
 export class GetUsersList extends React.Component<GetUsersListPropsI, GetUserListStateInterface> {
-    constructor(props: GetUsersListPropsI) {
-        super(props);
+  constructor(props: GetUsersListPropsI) {
+    super(props);
 
-        this.state = {
-            users: [],
-            isUsersLoading: true,
-            errorLoadUsers: "",
-            URL: "https://jsonplaceholder.typicode.com/users"
+    this.state = {
+      users: [],
+      isUsersLoading: true,
+      errorLoadUsers: '',
+      URL: 'https://jsonplaceholder.typicode.com/users',
+    };
+
+    this.onGetUsersList = this.onGetUsersList.bind(this);
+  }
+
+  componentDidMount() {
+    const { state } = this;
+    fetch(state.URL)
+      .then((response) => response.json())
+      .then((json) => {
+        if (json !== undefined) {
+          this.onGetUsersList(json);
         }
-
-        this.onGetUsersList = this.onGetUsersList.bind(this);
-    }
-
-    componentDidMount() {
-        fetch(this.state.URL)
-            .then((response) => response.json())
-            .then((json) => {
-                if (json !== undefined) {
-                    this.onGetUsersList(json)
-                }
-            })
-            .catch((error) => {
-                console.log(error);
-                this.setState({
-                    isUsersLoading: false,
-                    errorLoadUsers: "Something went wrong"
-                })
-            });
-    }
-
-    onGetUsersList(users_json: Array<UserInterface>) {
-        // console.log("OK");
-        // console.log(users_json);
+      })
+      .catch(() => {
         this.setState({
-            users: users_json,
-            isUsersLoading: false,
-            errorLoadUsers: ""
+          isUsersLoading: false,
+          errorLoadUsers: 'Something went wrong',
         });
-    }
+      });
+  }
 
-    render() {
-        return (
-            (this.state.isUsersLoading) ?
-                (this.state.errorLoadUsers ? <p>{this.state.errorLoadUsers}</p> : <p>Loading...</p>) :
-                <div>
-                    {this.state.users.map((user: UserInterface) =>
-                        <p key={user.id}>{user.name} <a href={user.website}>{user.website}</a></p>
-                    )}
-                </div>
+  onGetUsersList(usersJson: Array<UserInterface>) {
+    // console.log("OK");
+    // console.log(users_json);
+    this.setState({
+      users: usersJson,
+      isUsersLoading: false,
+      errorLoadUsers: '',
+    });
+  }
+
+  render() {
+    const { state } = this;
+    const loadingMessage = state.errorLoadUsers ? <p>{state.errorLoadUsers}</p> : <p>Loading...</p>;
+    return (
+      state.isUsersLoading ? loadingMessage
+        : (
+          <div>
+            {state.users.map((user: UserInterface) => (
+              <p key={user.id}>
+                {user.name}
+                {' '}
+                <a href={user.website}>{user.website}</a>
+              </p>
+            ))}
+          </div>
         )
-    }
+    );
+  }
+}
+
+export function Users() {
+  return (
+    <div>
+      <h2>Users list</h2>
+      <GetUsersList />
+    </div>
+  );
 }
