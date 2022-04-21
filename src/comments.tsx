@@ -15,7 +15,7 @@ const Button = styled.button`
   }
 `;
 
-interface CommentI {
+type CommentI = {
     postId: string;
     id: number;
     name: string;
@@ -23,11 +23,11 @@ interface CommentI {
     body: string;
 }
 
-interface CommentsPropsI {
+type CommentsPropsI = {
     postId: string;
 }
 
-interface CommentsStateI {
+type CommentsStateI = {
     postId: string;
     editingComment: CommentI;
     comments: Array<CommentI>;

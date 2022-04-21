@@ -1,20 +1,15 @@
 import * as React from 'react';
 import UserInterface from './UserInterface';
 
-interface GetUserListStateInterface {
+type GetUserListStateInterface = {
     users: Array<UserInterface>;
     isUsersLoading: boolean;
     errorLoadUsers: string;
     URL: string;
 }
 
-interface GetUsersListPropsI {
-    // url: string;
-    // onFilterByUser: any;//5555
-}
-
-export class GetUsersList extends React.Component<GetUsersListPropsI, GetUserListStateInterface> {
-  constructor(props: GetUsersListPropsI) {
+export class GetUsersList extends React.Component<any, GetUserListStateInterface> {
+  constructor(props) {
     super(props);
 
     this.state = {

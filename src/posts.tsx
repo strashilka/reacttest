@@ -8,23 +8,19 @@ import Post from './post';
 
 const POSTS_PER_PAGE = 5;
 
-interface UserShortInfoI {
+type UserShortInfoI = {
     id: number,
     name: string
 }
 
-interface GetPostListStateI{
+type GetPostListStateI = {
     currentPage: number;
     posts: Array<PostInterface>;
     users: Array<UserShortInfoI>;
 }
 
-interface GetPostListPropsI{
-
-}
-
-export class GetPostList extends React.Component<GetPostListPropsI, GetPostListStateI> {
-  constructor(props: GetPostListPropsI) {
+export class GetPostList extends React.Component<any, GetPostListStateI> {
+  constructor(props) {
     super(props);
     this.state = {
       currentPage: -1,

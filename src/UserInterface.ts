@@ -1,4 +1,4 @@
-interface UserInterface {
+type UserInterface = {
     id: number;
     name: string;
     username: string;

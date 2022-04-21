@@ -1,4 +1,4 @@
-interface PostInterface {
+type PostInterface = {
     id: string;
     userId: number;
     title: string;

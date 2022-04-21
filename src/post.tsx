@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom';
 import Comments from './comments';
 import PostInterface from './PostInterface';
 
-interface PostInnerPropsI {
+type PostInnerPropsI = {
     postId: string;
 }
 
-interface PostInnerStateI {
+type PostInnerStateI = {
     postId: string;
     currentPost: PostInterface;
     posts: Array<PostInterface>
