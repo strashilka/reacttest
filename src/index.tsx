@@ -7,6 +7,7 @@ import NavigationMenu from './nav';
 import Posts from './posts';
 import Post from './post';
 import './index.css';
+import Example from './hooktest';
 
 const DivError = styled.div`
   color: red;
@@ -49,6 +50,7 @@ ReactDOM.render(
         <Route path=":postId" element={<Post />} />
       </Route>
       <Route path="users" element={<Users />} />
+      <Route path="example" element={<Example />} />
       <Route path="*" element={<NotFound404 />} />
     </Routes>
   </BrowserRouter>,

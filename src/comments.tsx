@@ -1,6 +1,6 @@
 import * as React from 'react';
 import styled from '@emotion/styled';
-import { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 
 const Button = styled.button`
   padding: 3px;
@@ -27,142 +27,88 @@ type CommentsPropsI = {
     postId: string;
 }
 
-type CommentsStateI = {
-    postId: string;
-    editingComment: CommentI;
-    comments: Array<CommentI>;
-    isLoading: boolean;
-}
+export default function Comments({ postId }: CommentsPropsI) {
+  const currentPostId = postId;
+  const [editingComment, setEditingComment] = useState<CommentI>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [comments, setComments] = useState<Array<CommentI>>([]);
 
-export default class Comments extends React.Component<CommentsPropsI, CommentsStateI> {
-  constructor(props: CommentsPropsI) {
-    super(props);
-    this.state = {
-      postId: props.postId,
-      editingComment: null,
-      isLoading: false,
-      comments: [],
-    };
+  useEffect(() => {
+    setIsLoading(true);
 
-    this.removeComment = this.removeComment.bind(this);
-    this.startEditComment = this.startEditComment.bind(this);
-    this.updateComment = this.updateComment.bind(this);
-    this.onChange = this.onChange.bind(this);
-    this.getComments = this.getComments.bind(this);
-  }
-
-  componentDidMount() {
-    this.getComments();
-  }
-
-  componentWillUnmount() {
-  }
-
-  onChange(event: React.FormEvent<HTMLTextAreaElement>) {
-    const { editingComment } = this.state;
-    editingComment.body = (event.target as HTMLTextAreaElement).value;
-
-    this.setState({
-      editingComment,
-    });
-  }
-
-  getComments() {
-    this.setState({
-      isLoading: true,
-    });
-    const { state } = this;
-    fetch(`https://jsonplaceholder.typicode.com/posts/${parseInt(state.postId, 10)}/comments`)
+    fetch(`https://jsonplaceholder.typicode.com/posts/${parseInt(currentPostId, 10)}/comments`)
       .then((response) => response.json())
-      .then((json) => {
+      .then((json:Array<CommentI>) => {
         if (json !== undefined) {
-          this.setState({
-            comments: json,
-            isLoading: false,
-          });
+          setIsLoading(false);
+          setComments(json);
         }
       })
       .catch((error) => {
-        this.setState({
-          isLoading: false,
-        });
+        setIsLoading(false);
         throw (error);
       });
+  }, []);
+
+  function onChange(event: React.FormEvent<HTMLTextAreaElement>) {
+    const newComment:CommentI = { ...editingComment };
+    newComment.body = (event.target as HTMLTextAreaElement).value;
+    setEditingComment(newComment);
   }
 
-  removeComment(commentId: number) {
+  function removeComment(commentId: number) {
     fetch(`https://jsonplaceholder.typicode.com/comments/${commentId}`, {
       method: 'DELETE',
     })
       .then(() => {
-        const { comments } = this.state;
         const newComments = comments.filter((comment: CommentI) => comment.id !== commentId);
-
-        this.setState({
-          comments: newComments,
-        });
+        setComments(newComments);
       })
       .catch((error) => {
         throw (error);
       });
   }
 
-  startEditComment(commentId: number) {
-    const { state } = this;
-    const comment = state.comments.filter((editedComment) => editedComment.id === commentId);
-    this.setState({
-      editingComment: comment[0],
-    });
+  function startEditComment(commentId: number) {
+    const comment = comments.filter((editedComment) => editedComment.id === commentId);
+    setEditingComment(comment[0]);
   }
 
-  updateComment() {
-    const { state } = this;
-    const currentComment = state.editingComment;
-    fetch(`https://jsonplaceholder.typicode.com/comments/${currentComment.id}`, {
+  function updateComment() {
+    fetch(`https://jsonplaceholder.typicode.com/comments/${editingComment.id}`, {
       method: 'PUT',
       body: JSON.stringify({
-        current_comment: currentComment,
+        current_comment: editingComment,
       }),
       headers: {
         'Content-type': 'application/json; charset=UTF-8',
       },
     })
       .then(() => {
-        const { comments } = this.state;
         const newComments = comments.map((comment) => (
-          (comment.id === currentComment.id) ? currentComment : comment));
+          (comment.id === editingComment.id) ? editingComment : comment));
 
-        this.setState({
-          comments: newComments,
-          editingComment: null,
-        });
+        setEditingComment(null);
+        setComments(newComments);
       })
       .catch((error) => {
         throw (error);
       });
   }
 
-  render() {
-    const { state } = this;
-    let output: ReactNode;
-
-    if (state.isLoading) {
-      output = <div>Loading comments...</div>;
-    } else {
-      output = state.comments.map((comment) => ((
-        (state.editingComment != null)
-                && (state.editingComment.id === comment.id)
-      )
+  function outputCommentsList() {
+    return comments.map((comment) => (
+      ((editingComment != null) && (editingComment.id === comment.id))
         ? (
           <li key={comment.id}>
             <textarea
               cols={100}
               rows={5}
-              name={state.editingComment.body}
-              value={state.editingComment.body}
+              name={editingComment.id.toString()}
+              value={editingComment.body}
               className="multiline"
-              onChange={this.onChange}
-              onBlur={this.updateComment}
+              onChange={onChange}
+              onBlur={updateComment}
             />
           </li>
         )
@@ -172,20 +118,24 @@ export default class Comments extends React.Component<CommentsPropsI, CommentsSt
               <b><i>{comment.email}</i></b>
               {' '}
               {comment.body}
-              <Button type="button" onClick={() => this.startEditComment(comment.id)}>
+              <Button type="button" onClick={() => startEditComment(comment.id)}>
                 Edit
               </Button>
-              <Button type="button" onClick={() => this.removeComment(comment.id)}>
+              <Button type="button" onClick={() => removeComment(comment.id)}>
                 Remove
               </Button>
-              {/* <i onClick={this.removeComment} data-param={comment.id}>remove</i> */}
-              {/* {" "} */}
-              {/* <i onClick={this.startEditComment} data-param={comment.id}>edit</i> */}
             </p>
           </li>
         )));
-    }
-
-    return <ul>{output}</ul>;
   }
+
+  if (!isLoading) {
+    return (
+      <ul>
+        {outputCommentsList()}
+      </ul>
+    );
+  }
+
+  return <div>Loading comments...</div>;
 }

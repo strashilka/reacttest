@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import Select from 'react-select';
 import PostInterface from './PostInterface';
 import Post from './post';
@@ -13,61 +13,67 @@ type UserShortInfoI = {
     name: string
 }
 
-type GetPostListStateI = {
-    currentPage: number;
-    posts: Array<PostInterface>;
-    users: Array<UserShortInfoI>;
-}
+export function GetPostList() {
+  const [currentPage, setCurrentPage] = useState({ selected: -1 });
+  const [posts, setPosts] = useState<Array<PostInterface>>([]);
+  const [users, setUsers] = useState<Array<UserShortInfoI>>([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-export class GetPostList extends React.Component<any, GetPostListStateI> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      currentPage: -1,
-      posts: [],
-      users: [],
-    };
+  function fetchAllPosts() {
+    fetch('https://jsonplaceholder.typicode.com/posts')
+      .then((response) => response.json())
+      .then((json: Array<PostInterface>) => {
+        if (json !== undefined) {
+          const usersList: Array<UserShortInfoI> = [];
+          json.forEach((post) => {
+            const user: UserShortInfoI = {
+              id: 0,
+              name: '',
+            };
+            user.id = post.userId;
+            user.name = `User number ${post.userId}`;
 
-    this.onPageChange = this.onPageChange.bind(this);
-    this.onFilterByUser = this.onFilterByUser.bind(this);
+            if (usersList.findIndex((x) => x.id === user.id) === -1) { usersList.push(user); }
+          });
+
+          setUsers(usersList);
+          setPosts(json);
+          setCurrentPage({ selected: 0 });
+        }
+      })
+      .catch((error) => {
+        throw (error);
+      });
   }
 
-  componentDidMount() {
-    this.fetchAllPosts();
-  }
+  useEffect(() => {
+    fetchAllPosts();
+  }, []);
 
-  onPageChange(selectedItem: { selected: number }) {
-    this.setState({
-      currentPage: selectedItem.selected,
-    });
-  }
-
-  onFilterByUser(newValue: any) {
-    const userId: number = newValue.value;
-
-    if (Number.isNaN(userId) || userId === 0) {
-      this.fetchAllPosts();
+  function handleFilterByUser() {
+    if (selectedUser === null || selectedUser.value === 0) {
+      fetchAllPosts();
       return;
     }
 
-    // console.log("https://jsonplaceholder.typicode.com/users/" + user_id + "/posts");
-    fetch(`https://jsonplaceholder.typicode.com/users/${userId}/posts`)
+    fetch(`https://jsonplaceholder.typicode.com/users/${selectedUser.value}/posts`)
       .then((response) => response.json())
-      .then((json) => {
+      .then((json:Array<PostInterface>) => {
         if (json !== undefined) {
-          this.setState({
-            posts: json,
-            currentPage: 0,
-          });
+          setPosts(json);
+          setCurrentPage({ selected: 0 });
         }
       });
   }
 
-  currentPagePostsList() {
-    const { state } = this;
-    const startIndex = state.currentPage * POSTS_PER_PAGE;
+  useEffect(() => {
+    handleFilterByUser();
+  }, [selectedUser]);
+
+  function currentPagePostsList() {
+    const startIndex = currentPage.selected * POSTS_PER_PAGE;
     const endIndex = startIndex + POSTS_PER_PAGE;
-    const postsForPage = state.posts.slice(startIndex, endIndex);
+    const postsForPage = posts.slice(startIndex, endIndex);
 
     return postsForPage.map((post) => (
       <div key={post.id}>
@@ -86,96 +92,58 @@ export class GetPostList extends React.Component<any, GetPostListStateI> {
     ));
   }
 
-  private processPosts(json: Array<PostInterface>) {
-    const users: Array<UserShortInfoI> = [];
-    json.map((post) => {
-      const user: UserShortInfoI = {
-        id: 0,
-        name: '',
-      };
-      user.id = post.userId;
-      user.name = `User number ${post.userId}`;
-
-      if (users.findIndex((x) => x.id === user.id) === -1) { users.push(user); }
-
-      return user;
-    });
-    this.setState({
-      posts: json,
-      currentPage: 0,
-      users,
-    });
-  }
-
-  fetchAllPosts() {
-    fetch('https://jsonplaceholder.typicode.com/posts')
-      .then((response) => response.json())
-      .then((json) => {
-        if (json !== undefined) {
-          this.processPosts(json);
-        }
-      })
-      .catch((error) => {
-        throw (error);
-      });
-  }
-
-  outputUsers() {
+  function outputUsersSelect():ReactNode {
     const options = [];
     options.push({
       value: 0,
       label: '--- Do not filter ---',
     });
-    const { state } = this;
-    state.users.map((user: UserShortInfoI) => options.push({
+    users.map((user: UserShortInfoI) => options.push({
       value: user.id,
       label: user.name,
     }));
 
-    return <Select options={options} onChange={this.onFilterByUser} />;
+    return <Select options={options} onChange={setSelectedUser} />;
   }
 
-  render() {
-    let output : ReactNode;
-    const { state } = this;
-    if (state.posts.length === 0) {
-      output = <p>Fetching...</p>;
-    } else {
-      output = (
-        <p>
-          Posts number
-          {state.posts.length}
-          {' '}
-          current page
-          {state.currentPage + 1}
-          {' '}
-          posts per page
-          {POSTS_PER_PAGE}
-        </p>
-      );
+  function outputInfo() {
+    if (posts.length === 0) {
+      return <p>Fetching...</p>;
     }
-
     return (
-      <div>
-        {output}
-        {this.outputUsers()}
-        {this.currentPagePostsList()}
-        <ReactPaginate
-          breakLabel="..."
-          nextLabel="next >"
-          onPageChange={this.onPageChange}
-          pageRangeDisplayed={2}
-          forcePage={state.currentPage}
-          pageCount={state.posts.length / POSTS_PER_PAGE}
-          previousLabel="< prev"
-          renderOnZeroPageCount={null}
-          className="pagination"
-          activeClassName="active"
-          disabledClassName="grey"
-        />
-      </div>
+      <p>
+        Posts number
+        {posts.length}
+        {' '}
+        current page
+        {currentPage.selected + 1}
+        {' '}
+        posts per page
+        {POSTS_PER_PAGE}
+      </p>
     );
   }
+
+  return (
+    <div>
+      {outputInfo()}
+      {outputUsersSelect()}
+      {currentPagePostsList()}
+      <ReactPaginate
+        breakLabel="..."
+        nextLabel="next >"
+        onPageChange={setCurrentPage}
+        pageRangeDisplayed={2}
+        forcePage={currentPage.selected}
+        pageCount={posts.length / POSTS_PER_PAGE}
+        previousLabel="< prev"
+        renderOnZeroPageCount={null}
+        className="pagination"
+        activeClassName="active"
+        disabledClassName="grey"
+      />
+    </div>
+  );
 }
 
 export default function Posts() {

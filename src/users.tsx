@@ -1,72 +1,63 @@
 import * as React from 'react';
-import UserInterface from './UserInterface';
+import { useState, useEffect } from 'react';
+import { UserInterface } from './UserInterface';
 
-type GetUserListStateInterface = {
-    users: Array<UserInterface>;
-    isUsersLoading: boolean;
-    errorLoadUsers: string;
-    URL: string;
-}
+export function GetUsersList() {
+  const url:string = 'https://jsonplaceholder.typicode.com/users';
+  const [isUsersLoading, setIsUsersLoading] = useState<Boolean>(true);
+  const [errorLoadUsers, setErrorLoadUsers] = useState<String>('');
+  const [users, setUsers] = useState<Array<UserInterface>>([]);
 
-export class GetUsersList extends React.Component<any, GetUserListStateInterface> {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      users: [],
-      isUsersLoading: true,
-      errorLoadUsers: '',
-      URL: 'https://jsonplaceholder.typicode.com/users',
-    };
-
-    this.onGetUsersList = this.onGetUsersList.bind(this);
-  }
-
-  componentDidMount() {
-    const { state } = this;
-    fetch(state.URL)
+  useEffect(() => {
+    fetch(url)
       .then((response) => response.json())
-      .then((json) => {
-        if (json !== undefined) {
-          this.onGetUsersList(json);
+      .then((jsonUsers:Array<UserInterface>) => {
+        if (jsonUsers !== undefined) {
+          setErrorLoadUsers('');
+          setUsers(jsonUsers);
+        } else {
+          setErrorLoadUsers('Users array is empty');
         }
+        setIsUsersLoading(false);
       })
-      .catch(() => {
-        this.setState({
-          isUsersLoading: false,
-          errorLoadUsers: 'Something went wrong',
-        });
+      .catch((error) => {
+        setIsUsersLoading(false);
+        setErrorLoadUsers('Something went wrong');
+        throw (error);
       });
+  }, []);
+
+  function hasUsers():Boolean {
+    return users.length > 0;
   }
 
-  onGetUsersList(usersJson: Array<UserInterface>) {
-    // console.log("OK");
-    // console.log(users_json);
-    this.setState({
-      users: usersJson,
-      isUsersLoading: false,
-      errorLoadUsers: '',
-    });
-  }
-
-  render() {
-    const { state } = this;
-    const loadingMessage = state.errorLoadUsers ? <p>{state.errorLoadUsers}</p> : <p>Loading...</p>;
+  function renderUsersTable() {
     return (
-      state.isUsersLoading ? loadingMessage
-        : (
-          <div>
-            {state.users.map((user: UserInterface) => (
-              <p key={user.id}>
-                {user.name}
-                {' '}
-                <a href={user.website}>{user.website}</a>
-              </p>
-            ))}
-          </div>
-        )
+      <div>
+        {users.map((user: UserInterface) => (
+          <p key={user.id}>
+            {user.name}
+            {' '}
+            <a href={user.website}>{user.website}</a>
+          </p>
+        ))}
+      </div>
     );
   }
+
+  function renderUsersMessage() {
+    if (isUsersLoading) {
+      return <p>Loading...</p>;
+    }
+
+    return <p>{errorLoadUsers}</p>;
+  }
+
+  if (hasUsers()) {
+    return renderUsersTable();
+  }
+
+  return renderUsersMessage();
 }
 
 export function Users() {

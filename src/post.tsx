@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Comments from './comments';
 import PostInterface from './PostInterface';
@@ -7,75 +8,29 @@ type PostInnerPropsI = {
     postId: string;
 }
 
-type PostInnerStateI = {
-    postId: string;
-    currentPost: PostInterface;
-    posts: Array<PostInterface>
-}
+function PostInner({ postId }:PostInnerPropsI) {
+  const [currentPost, setCurrentPost] = useState<PostInterface>(null);
 
-class PostInner extends React.Component<PostInnerPropsI, PostInnerStateI> {
-  constructor(props: PostInnerPropsI) {
-    super(props);
-    this.state = {
-      postId: props.postId,
-      currentPost: null,
-      posts: [],
-    };
-  }
-
-  componentDidMount() {
-    const { postId } = this.state;
-    this.getPostById(postId);
-  }
-
-  getPostById(postId: string) {
-    // console.log("getPostById");
-    // fetching post
-    const { state } = this;
-    const post = state.posts.find((searchedPost) => searchedPost.id === postId);
-    if (post) {
-      this.setState({
-        currentPost: post,
-      });
-    } else {
-      // console.log("getPostById 2");
-      this.fetchPost(postId);
-      // requesst and save
-    }
-
-    this.setState({
-      currentPost: null,
-    });
-  }
-
-  fetchPost(postId: string) {
+  useEffect(() => {
     fetch(`https://jsonplaceholder.typicode.com/posts/${postId}`)
       .then((response) => response.json())
-      .then((json) => {
+      .then((json:PostInterface) => {
         if (json !== undefined) {
-          this.setState({
-            currentPost: json,
-          });
+          setCurrentPost(json);
         }
       });
-  }
+  }, []);
 
-  render() {
-    let outlet: any;// JSX.Element;
-    const { state } = this;
-    if (state.currentPost) {
-      outlet = (
-        <div key={state.currentPost.id}>
-          <h3 className="postTitle">{state.currentPost.title}</h3>
-          <p className="postBody">{state.currentPost.body}</p>
-          <Comments postId={state.currentPost.id} />
-        </div>
-      );
-    } else {
-      outlet = <h3>Fetching</h3>;
-    }
-    return (outlet);
+  if (currentPost) {
+    return (
+      <div key={currentPost.id}>
+        <h3 className="postTitle">{currentPost.title}</h3>
+        <p className="postBody">{currentPost.body}</p>
+        <Comments postId={currentPost.id} />
+      </div>
+    );
   }
+  return <h3>Fetching</h3>;
 }
 
 export default function Post() {
