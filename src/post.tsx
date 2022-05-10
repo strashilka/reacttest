@@ -1,41 +1,23 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import Comments from './comments';
-import PostInterface from './PostInterface';
+import { PostI, selectPostById } from './postsSlice';
+import { RootState } from './store';
 
-type PostInnerPropsI = {
-    postId: string;
-}
+export default function Post() {
+  const { postId } = useParams();
+  const post = useSelector<RootState, PostI>((state) => selectPostById(state, postId));
 
-function PostInner({ postId }:PostInnerPropsI) {
-  const [currentPost, setCurrentPost] = useState<PostInterface>(null);
-
-  useEffect(() => {
-    fetch(`https://jsonplaceholder.typicode.com/posts/${postId}`)
-      .then((response) => response.json())
-      .then((json:PostInterface) => {
-        if (json !== undefined) {
-          setCurrentPost(json);
-        }
-      });
-  }, []);
-
-  if (currentPost) {
+  if (post) {
     return (
-      <div key={currentPost.id}>
-        <h3 className="postTitle">{currentPost.title}</h3>
-        <p className="postBody">{currentPost.body}</p>
-        <Comments postId={currentPost.id} />
+      <div key={post.id}>
+        <h3 className="postTitle">{post.title}</h3>
+        <p className="postBody">{post.body}</p>
+        <Comments postId={post.id} />
       </div>
     );
   }
-  return <h3>Fetching</h3>;
-}
 
-export default function Post() {
-  const params = useParams();
-  const { postId } = params;
-
-  return <PostInner postId={postId} />;
+  return <h3>Something went wrong</h3>;
 }

@@ -81,3 +81,13 @@ li.grey{
     width: 100%;
     height: 75px;
 }
+
+.error{
+    background-color: red;
+    display: block;
+}
+
+.notification{
+    background-color: deepskyblue;
+    display: block;
+}

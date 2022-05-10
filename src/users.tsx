@@ -1,70 +1,45 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { UserInterface } from './UserInterface';
+import { usersSelectors } from './usersSlice';
+import { RootState } from './store';
 
-export function GetUsersList() {
-  const url:string = 'https://jsonplaceholder.typicode.com/users';
-  const [isUsersLoading, setIsUsersLoading] = useState<Boolean>(true);
-  const [errorLoadUsers, setErrorLoadUsers] = useState<String>('');
-  const [users, setUsers] = useState<Array<UserInterface>>([]);
+export default function UsersList() {
+  const users = useSelector(usersSelectors.selectAll);
+  const loadingStatus = useSelector((state:RootState) => state.users.status);
 
-  useEffect(() => {
-    fetch(url)
-      .then((response) => response.json())
-      .then((jsonUsers:Array<UserInterface>) => {
-        if (jsonUsers !== undefined) {
-          setErrorLoadUsers('');
-          setUsers(jsonUsers);
-        } else {
-          setErrorLoadUsers('Users array is empty');
-        }
-        setIsUsersLoading(false);
-      })
-      .catch((error) => {
-        setIsUsersLoading(false);
-        setErrorLoadUsers('Something went wrong');
-        throw (error);
-      });
-  }, []);
-
-  function hasUsers():Boolean {
-    return users.length > 0;
-  }
-
-  function renderUsersTable() {
+  if (loadingStatus === 'loading') {
     return (
-      <div>
-        {users.map((user: UserInterface) => (
-          <p key={user.id}>
-            {user.name}
-            {' '}
-            <a href={user.website}>{user.website}</a>
-          </p>
-        ))}
+      <div className="notification">
+        Loading
       </div>
     );
   }
 
-  function renderUsersMessage() {
-    if (isUsersLoading) {
-      return <p>Loading...</p>;
-    }
-
-    return <p>{errorLoadUsers}</p>;
+  if (loadingStatus === 'failed') {
+    return (
+      <div className="error">
+        Loading error!!!
+      </div>
+    );
   }
 
-  if (hasUsers()) {
-    return renderUsersTable();
-  }
+  const renderedUserItems = users.map((user: UserInterface) => (
+    <p key={user.id}>
+      {user.name}
+      {' '}
+      <a href={user.website}>{user.website}</a>
+    </p>
+  ));
 
-  return renderUsersMessage();
+  return <ul>{renderedUserItems}</ul>;
 }
 
 export function Users() {
   return (
     <div>
       <h2>Users list</h2>
-      <GetUsersList />
+      <UsersList />
     </div>
   );
 }

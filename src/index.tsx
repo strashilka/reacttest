@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { Users } from './users';
@@ -7,18 +8,19 @@ import NavigationMenu from './nav';
 import Posts from './posts';
 import Post from './post';
 import './index.css';
-import Example from './hooktest';
+import { store } from './store';
+import { fetchUsers } from './usersSlice';
+import { fetchPosts } from './postsSlice';
+
+store.dispatch(fetchUsers());
+store.dispatch(fetchPosts());
 
 const DivError = styled.div`
   color: red;
   padding: 20px 0;
 `;
 
-// let AnotherComp = styled.div`
-//   color: ${props => props.color};
-// `
-
-function App() {
+function Main() {
   return (
     <div>
       <h3>Тестовое. Задача:</h3>
@@ -36,23 +38,32 @@ function App() {
 function NotFound404() {
   return (
     <DivError>
-      Not found 404
+      Not found, 404
     </DivError>
   );
 }
 
+function App() {
+  return (
+    <BrowserRouter>
+      <NavigationMenu />
+      <Routes>
+        <Route path="/" element={<Main />} />
+        <Route path="posts" element={<Posts />}>
+          <Route path=":postId" element={<Post />} />
+        </Route>
+        <Route path="users" element={<Users />} />
+        <Route path="*" element={<NotFound404 />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
 ReactDOM.render(
-  <BrowserRouter>
-    <NavigationMenu />
-    <Routes>
-      <Route path="/" element={<App />} />
-      <Route path="posts" element={<Posts />}>
-        <Route path=":postId" element={<Post />} />
-      </Route>
-      <Route path="users" element={<Users />} />
-      <Route path="example" element={<Example />} />
-      <Route path="*" element={<NotFound404 />} />
-    </Routes>
-  </BrowserRouter>,
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>,
   document.getElementById('root'),
 );
