@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { fetchCommentsByPostId, getCommentsIdsByPostId, wasCommentsLoadedByPostId } from './commentsSlice';
 import { RootState, store } from './store';
 import Comment from './comment';
+import { Loading } from './utils';
 
 type CommentsPropsI = {
     postId: string;
@@ -21,13 +22,7 @@ export default function Comments({ postId }: CommentsPropsI) {
     }
   }, [loadingStatus, wasLoaded]);
 
-  if (loadingStatus === 'loading') {
-    return (
-      <div className="notification">
-        Loading posts...
-      </div>
-    );
-  }
+  if (loadingStatus === 'loading') return <Loading text="Comments loading... " />;
 
   if (loadingStatus === 'failed') {
     return (
@@ -37,15 +32,9 @@ export default function Comments({ postId }: CommentsPropsI) {
     );
   }
 
-  function commentsList() {
-    return commentsIds.map((commentId:number) => (
-      <Comment commentId={commentId} key={commentId} />
-    ));
-  }
-
   return (
     <ul>
-      {commentsList()}
+      {commentsIds.map((commentId:number) => <Comment commentId={commentId} key={commentId} />)}
     </ul>
   );
 }

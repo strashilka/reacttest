@@ -1,12 +1,15 @@
 import * as React from 'react';
-import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Comments from './comments';
 import { PostI, selectPostById } from './postsSlice';
 import { RootState } from './store';
 
-export default function Post() {
-  const { postId } = useParams();
+export type PostProps={
+    postId:number
+}
+
+export default function Post(props:PostProps) {
+  const { postId } = props;
   const post = useSelector<RootState, PostI>((state) => selectPostById(state, postId));
 
   if (post) {

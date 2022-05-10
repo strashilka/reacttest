@@ -42,6 +42,6 @@ describe('NavigationMenu', () => {
     );
 
     const links = screen.getAllByRole('link');
-    expect(links.length).toBe(2);
+    expect(links.length).toBe(3);
   });
 });

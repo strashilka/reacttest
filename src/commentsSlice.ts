@@ -76,7 +76,7 @@ export const commentsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchCommentsByPostId.pending, (state) => {
-        state.status = 'idle';
+        state.status = 'loading';
         state.error = '';
       })
       .addCase(fetchCommentsByPostId.fulfilled, (state, action) => {

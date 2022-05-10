@@ -118,10 +118,9 @@ export function PostsList() {
 }
 
 export default function Posts() {
-  const params = useParams();
-  const { postId } = params;
+  const { postId } = useParams();
   if (undefined !== postId) {
-    return <Post />;
+    return <Post postId={parseInt(postId, 10)} />;
   }
   return (
     <div>
