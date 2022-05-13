@@ -1,40 +1,23 @@
 import * as React from 'react';
-import styled from '@emotion/styled';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import {
-  CommentI, editComment, removeComment, selectCommentById,
-} from './commentsSlice';
-import { RootState, store } from './store';
+  Comment, editComment, removeComment, selectCommentById,
+} from 'store/commentsSlice';
+import { RootState, store } from 'store/store';
+import { Button, commentItemStyles } from './CommentItem.styles';
 
-const Button = styled.button`
-  padding: 3px;
-  background-color: transparent;
-  font-size: 14px;
-  font-style: italic;
-  color: red;
-  border: none;
-
-  &:hover {
-    color: blue;
-  }
-`;
-
-type CommentPropsI = {
+type CommentProps = {
     commentId: number;
 }
 
-export default function Comment({ commentId }: CommentPropsI) {
-  // const dispatch = useDispatch();
+export default function CommentItem({ commentId }: CommentProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentEditingValue, setCurrentEditingValue] = useState('');
-  // const isEditing:boolean = false;
-  const comment = useSelector<RootState, CommentI>((state) => selectCommentById(state, commentId));
+  const comment = useSelector<RootState, Comment>((state) => selectCommentById(state, commentId));
 
   function onChange(event: React.FormEvent<HTMLTextAreaElement>) {
     setCurrentEditingValue((event.target as HTMLTextAreaElement).value);
-    // const newComment:CommentI = { ...comment };
-    // newComment.body = (event.target as HTMLTextAreaElement).value;
   }
 
   function updateComment() {
@@ -44,7 +27,7 @@ export default function Comment({ commentId }: CommentPropsI) {
   useEffect(() => {
     if (currentEditingValue !== ''
         && currentEditingValue !== comment.body
-        && isEditing === false) {
+        && !isEditing) {
       store.dispatch(editComment({
         commentId: comment.id,
         commentBody: currentEditingValue,
@@ -74,20 +57,10 @@ export default function Comment({ commentId }: CommentPropsI) {
       )
       : (
         <li key={comment.id}>
-          <p>
-            <b><i>{comment.email}</i></b>
-            {' '}
-            {comment.body}
-            <Button type="button" onClick={() => startEdit()}>
-              Edit
-            </Button>
-            <Button
-              type="button"
-              onClick={() => store.dispatch(removeComment(comment.id))}
-            >
-              Remove
-            </Button>
-          </p>
+          <span style={commentItemStyles}>{comment.email}</span>
+          {comment.body}
+          <Button type="button" onClick={() => startEdit()}>Edit</Button>
+          <Button type="button" onClick={() => store.dispatch(removeComment(comment.id))}>Remove</Button>
         </li>
       ));
 }

@@ -13,6 +13,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/react-redux": "^7.1.24",
     "jsx-dom": "^8.0.1-beta.5",
+    "module-alias": "^2.2.2",
     "msw": "^0.39.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -23,6 +24,7 @@
     "react-scripts": "5.0.0",
     "react-select": "^5.3.0",
     "redux-devtools-extension": "^2.13.9",
+    "redux-mock-store": "^1.5.4",
     "ts-loader": "^9.2.8",
     "web-vitals": "^2.1.4",
     "webpack": "^5.72.0",
@@ -33,7 +35,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --watchAll --detectOpenHandles",
     "eject": "react-scripts eject",
-    "magic": "webpack",
+    "magic": "webpack -w",
     "lint": "eslint ./src/ --ext .js,.jsx,.ts,.tsx --fix"
   },
   "browserslist": {
@@ -56,6 +58,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.29.4",
-    "eslint-plugin-react-hooks": "^4.4.0"
+    "eslint-plugin-react-hooks": "^4.4.0",
+    "webpack-config-utils": "^2.3.1"
   }
 }

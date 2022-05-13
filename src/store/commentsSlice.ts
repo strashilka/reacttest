@@ -3,7 +3,7 @@ import {
 } from '@reduxjs/toolkit';
 import { RootState } from './store';
 
-export type CommentI = {
+export type Comment = {
   postId: number;
   id: number;
   name: string;
@@ -16,11 +16,11 @@ type commentsState = {
     status: 'idle' | 'loading' | 'succeeded' | 'failed'
     error: string
     currentPostId: number
-    postComments: Array<CommentI>
-  entities:Array<CommentI>
+    postComments: Array<Comment>
+  entities:Array<Comment>
 }
 
-const commentsAdapter:EntityAdapter<CommentI> = createEntityAdapter<CommentI>();
+const commentsAdapter:EntityAdapter<Comment> = createEntityAdapter<Comment>();
 
 export const commentsSelectors = commentsAdapter.getSelectors<RootState>(
   (state: RootState) => state.comments,
@@ -36,12 +36,12 @@ const initialState = commentsAdapter.getInitialState({
   entities: [],
 } as commentsState);
 
-export const fetchCommentsByPostId = createAsyncThunk('comments/fetchCommentsByPostId', async (postId:number) => {
+export const fetchCommentsByPostId = createAsyncThunk('CommentsList/fetchCommentsByPostId', async (postId:number) => {
   const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${postId}/comments`);
-  return (await response.json()) as Array<CommentI>;
+  return (await response.json()) as Array<Comment>;
 });
 
-export const removeComment = createAsyncThunk('comments/removeComment', async (commentId:number) => {
+export const removeComment = createAsyncThunk('CommentsList/removeComment', async (commentId:number) => {
   const response = await fetch(`https://jsonplaceholder.typicode.com/comments/${commentId}`, {
     method: 'DELETE',
   });
@@ -53,7 +53,7 @@ export type UpdateComment = {
   commentBody: string
 }
 
-export const editComment:AsyncThunk<CommentI, UpdateComment, any> = createAsyncThunk('comments/editComment', async (data: UpdateComment) => {
+export const editComment:AsyncThunk<Comment, UpdateComment, any> = createAsyncThunk('CommentsList/editComment', async (data: UpdateComment) => {
   const response = await fetch(`https://jsonplaceholder.typicode.com/comments/${data.commentId}`, {
     method: 'PATCH',
     body: JSON.stringify({
@@ -65,7 +65,7 @@ export const editComment:AsyncThunk<CommentI, UpdateComment, any> = createAsyncT
       'Content-type': 'application/json; charset=UTF-8',
     },
   });
-  return (await response.json()) as CommentI;
+  return (await response.json()) as Comment;
 });
 
 export const commentsSlice = createSlice({
@@ -86,7 +86,7 @@ export const commentsSlice = createSlice({
       })
       .addCase(fetchCommentsByPostId.rejected, (state) => {
         state.status = 'idle';
-        state.error = 'Can not load comments for post ';
+        state.error = 'Can not load CommentsList for post ';
       })
       .addCase(removeComment.fulfilled, (state, action) => {
         const commentId = action.meta.arg;
@@ -103,7 +103,7 @@ const selectSelf = (state: RootState) => state;
 export const getCommentsIdsByPostId = (postId: number) => createSelector(
   selectSelf,
   (state: RootState) => {
-    const commentsArray: Array<CommentI> = Object.values(state.comments.entities);
+    const commentsArray: Array<Comment> = Object.values(state.comments.entities);
     return commentsArray.filter((comment) => comment.postId === postId && !comment.isDeleted)
       .map((comment) => comment.id);
   },
@@ -112,7 +112,7 @@ export const getCommentsIdsByPostId = (postId: number) => createSelector(
 export const wasCommentsLoadedByPostId = (postId: number) => createSelector(
   selectSelf,
   (state: RootState) => {
-    const commentsArray: Array<CommentI> = Object.values(state.comments.entities);
+    const commentsArray: Array<Comment> = Object.values(state.comments.entities);
     return commentsArray.filter((comment) => comment.postId === postId).length > 0;
   },
 );

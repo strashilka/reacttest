@@ -3,7 +3,7 @@ import {
 } from '@reduxjs/toolkit';
 import { RootState } from './store';
 
-export type PostI = {
+export type Post = {
   id: string;
   userId: number;
   title: string;
@@ -13,10 +13,10 @@ export type PostI = {
 type postsState = {
     status: 'idle' | 'loading' | 'succeeded' | 'failed'
     error: string
-    entities: Array<PostI>
+    entities: Array<Post>
 }
 
-const postsAdapter: EntityAdapter<PostI> = createEntityAdapter();
+const postsAdapter: EntityAdapter<Post> = createEntityAdapter();
 export const postsSelectors = postsAdapter.getSelectors<RootState>(
   (state) => state.posts,
 );
@@ -30,9 +30,9 @@ const initialState = postsAdapter.getInitialState({
   entities: [],
 } as postsState);
 
-export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
+export const fetchPosts = createAsyncThunk('Posts/fetchPosts', async () => {
   const response = await fetch('https://jsonplaceholder.typicode.com/posts/');
-  return (await response.json()) as Array<PostI>;
+  return (await response.json()) as Array<Post>;
 });
 
 export const postsSlice = createSlice({
@@ -53,7 +53,7 @@ export const postsSlice = createSlice({
       })
       .addCase(fetchPosts.rejected, (state) => {
         state.status = 'failed';
-        state.error = 'No loaded users';
+        state.error = 'No loaded UsersList';
       });
   },
 });

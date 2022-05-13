@@ -2,7 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom'; // toBeInTheDocument
 import { BrowserRouter } from 'react-router-dom';
-import NavigationMenu from './nav';
+import NavigationMenu from './NavigationMenu';
 
 describe('NavigationMenu', () => {
   test('renders Navigation Menu', () => {
@@ -12,7 +12,7 @@ describe('NavigationMenu', () => {
       </BrowserRouter>,
     );
 
-    expect(screen.getByText('Posts')).toBeInTheDocument();
+    expect(screen.getByText('PostsList')).toBeInTheDocument();
     expect(screen.getByText('Users')).toBeInTheDocument();
   });
 
@@ -29,7 +29,7 @@ describe('NavigationMenu', () => {
     fireEvent.click(usersLink);
     expect(window.location.href).toBe(`${urlBeforeClick}users`);
 
-    const postsLink = screen.getByText('Posts');
+    const postsLink = screen.getByText('PostsList');
     fireEvent.click(postsLink);
     expect(window.location.href).toBe(`${urlBeforeClick}posts`);
   });

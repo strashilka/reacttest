@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
     "outDir": "./src/",
     "noImplicitAny": true,
     "module": "es6",
@@ -7,5 +8,6 @@
     "jsx": "react",
     "allowJs": true,
     "moduleResolution": "node",
-  }
+  },
+  "include": ["src"]
 }

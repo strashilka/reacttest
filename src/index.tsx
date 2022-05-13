@@ -3,14 +3,14 @@ import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { Users } from './users';
-import NavigationMenu from './nav';
-import Posts from './posts';
-import Post from './post';
+import { store } from 'store/store';
+import UsersList from 'views/Users/UsersList';
+import { fetchUsers } from 'store/usersSlice';
+import { fetchPosts } from 'store/postsSlice';
+import NavigationMenu from 'views/NavigationMenu/NavigationMenu';
+import PostsList from 'views/Posts/PostsList';
+import PostItem from 'views/Posts/PostItem';
 import './index.css';
-import { store } from './store';
-import { fetchUsers } from './usersSlice';
-import { fetchPosts } from './postsSlice';
 
 store.dispatch(fetchUsers());
 store.dispatch(fetchPosts());
@@ -49,10 +49,10 @@ function App() {
       <NavigationMenu />
       <Routes>
         <Route path="/" element={<Main />} />
-        <Route path="posts" element={<Posts />}>
-          <Route path=":postId" element={<Post />} />
+        <Route path="posts" element={<PostsList />}>
+          <Route path=":postId" element={<PostItem />} />
         </Route>
-        <Route path="users" element={<Users />} />
+        <Route path="users" element={<UsersList />} />
         <Route path="*" element={<NotFound404 />} />
       </Routes>
     </BrowserRouter>
