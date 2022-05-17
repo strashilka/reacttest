@@ -1,6 +1,12 @@
 import {
-  createSlice, createAsyncThunk, createEntityAdapter, createSelector, EntityAdapter, AsyncThunk,
+  AsyncThunk,
+  createAsyncThunk,
+  createEntityAdapter,
+  createSelector,
+  createSlice,
+  EntityAdapter,
 } from '@reduxjs/toolkit';
+import { LoadingStatus } from 'utils/LoadingStatus';
 import { RootState } from './store';
 
 export type Comment = {
@@ -13,7 +19,7 @@ export type Comment = {
 }
 
 type commentsState = {
-    status: 'idle' | 'loading' | 'succeeded' | 'failed'
+    status: LoadingStatus
     error: string
     currentPostId: number
     postComments: Array<Comment>
@@ -21,17 +27,12 @@ type commentsState = {
 }
 
 const commentsAdapter:EntityAdapter<Comment> = createEntityAdapter<Comment>();
-
-export const commentsSelectors = commentsAdapter.getSelectors<RootState>(
-  (state: RootState) => state.comments,
-);
-
 export const { selectById: selectCommentById } = commentsAdapter.getSelectors(
   (state:RootState) => state.comments,
 );
 
 const initialState = commentsAdapter.getInitialState({
-  status: 'idle',
+  status: LoadingStatus.Idle,
   error: '',
   entities: [],
 } as commentsState);
@@ -53,7 +54,7 @@ export type UpdateComment = {
   commentBody: string
 }
 
-export const editComment:AsyncThunk<Comment, UpdateComment, any> = createAsyncThunk('CommentsList/editComment', async (data: UpdateComment) => {
+export const editComment:AsyncThunk<Comment, UpdateComment, {}> = createAsyncThunk('CommentsList/editComment', async (data: UpdateComment) => {
   const response = await fetch(`https://jsonplaceholder.typicode.com/comments/${data.commentId}`, {
     method: 'PATCH',
     body: JSON.stringify({
@@ -76,16 +77,16 @@ export const commentsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchCommentsByPostId.pending, (state) => {
-        state.status = 'loading';
+        state.status = LoadingStatus.Loading;
         state.error = '';
       })
       .addCase(fetchCommentsByPostId.fulfilled, (state, action) => {
         commentsAdapter.upsertMany(state, action.payload);
-        state.status = 'idle';
+        state.status = LoadingStatus.Idle;
         state.error = '';
       })
       .addCase(fetchCommentsByPostId.rejected, (state) => {
-        state.status = 'idle';
+        state.status = LoadingStatus.Idle;
         state.error = 'Can not load CommentsList for post ';
       })
       .addCase(removeComment.fulfilled, (state, action) => {
@@ -115,4 +116,9 @@ export const wasCommentsLoadedByPostId = (postId: number) => createSelector(
     const commentsArray: Array<Comment> = Object.values(state.comments.entities);
     return commentsArray.filter((comment) => comment.postId === postId).length > 0;
   },
+);
+
+export const selectCommentsStatus = createSelector(
+  selectSelf,
+  (state:RootState) => state.comments.status,
 );

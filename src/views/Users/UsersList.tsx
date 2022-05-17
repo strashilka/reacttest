@@ -1,17 +1,17 @@
 import * as React from 'react';
 import { useSelector } from 'react-redux';
-import { usersSelectors } from 'store/usersSlice';
-import { RootState } from 'store/store';
-import { User } from 'src/views/Users/User';
-import { ErrorMessage, InfoMessage } from 'utils/utils';
+import { selectAllUsers, selectUsersStatus } from 'store/usersSlice';
+import { User } from 'views/Users/User';
+import { Message, MessageType } from 'components/Message/Message';
+import { LoadingStatus } from 'utils/LoadingStatus';
 import { usersListStyles } from './UsersList.styles';
 
 export default function UsersList() {
-  const users = useSelector(usersSelectors.selectAll);
-  const loadingStatus = useSelector((state:RootState) => state.users.status);
+  const users = useSelector(selectAllUsers);
+  const loadingStatus = useSelector(selectUsersStatus);
 
-  if (loadingStatus === 'loading') return <InfoMessage text="Loading users list " />;
-  if (loadingStatus === 'failed') return <ErrorMessage text="Loading users error!!!" />;
+  if (loadingStatus === LoadingStatus.Loading) return <Message text="Loading users list" />;
+  if (loadingStatus === LoadingStatus.Failed) return <Message text="Loading users error!!!" type={MessageType.Error} />;
 
   return (
     <div>

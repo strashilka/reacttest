@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import {
   Comment, editComment, removeComment, selectCommentById,
 } from 'store/commentsSlice';
-import { RootState, store } from 'store/store';
+import { AppDispatch, RootState } from 'store/store';
 import { Button, commentItemStyles } from './CommentItem.styles';
 
 type CommentProps = {
@@ -12,6 +12,7 @@ type CommentProps = {
 }
 
 export default function CommentItem({ commentId }: CommentProps) {
+  const dispatch:AppDispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [currentEditingValue, setCurrentEditingValue] = useState('');
   const comment = useSelector<RootState, Comment>((state) => selectCommentById(state, commentId));
@@ -28,7 +29,7 @@ export default function CommentItem({ commentId }: CommentProps) {
     if (currentEditingValue !== ''
         && currentEditingValue !== comment.body
         && !isEditing) {
-      store.dispatch(editComment({
+      dispatch(editComment({
         commentId: comment.id,
         commentBody: currentEditingValue,
       }));
@@ -60,7 +61,7 @@ export default function CommentItem({ commentId }: CommentProps) {
           <span style={commentItemStyles}>{comment.email}</span>
           {comment.body}
           <Button type="button" onClick={() => startEdit()}>Edit</Button>
-          <Button type="button" onClick={() => store.dispatch(removeComment(comment.id))}>Remove</Button>
+          <Button type="button" onClick={() => dispatch(removeComment(comment.id))}>Remove</Button>
         </li>
       ));
 }

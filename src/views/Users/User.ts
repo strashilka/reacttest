@@ -21,3 +21,8 @@ export type User = {
         bs: string;
     }
 }
+
+export type UserOption = {
+    value: number,
+    label: string
+}
